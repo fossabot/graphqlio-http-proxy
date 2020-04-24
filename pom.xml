@@ -63,6 +63,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <graphql-io-server-java.version>0.0.9</graphql-io-server-java.version>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
 		<java.source.version>8</java.source.version>
 		<java.target.version>8</java.target.version>
     </properties>
