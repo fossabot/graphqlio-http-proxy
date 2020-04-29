@@ -26,14 +26,12 @@ import com.graphqlio.wsf.domain.WsfFrameType;
 
 @Service
 public class WebSocketClientService {
-	
 
 	private final Logger logger = LoggerFactory.getLogger(WebSocketMessageHandler.class);
-		
 	private static int sFrameId = 0;
 
-	/// increase Standard Buffer size for socket - introspection message maybe lager than standard buffer size
-	/// exception: The decoded text message was too big for the output buffer and the endpoint does not support partial messages
+  /// increase Standard Buffer size for socket - introspection message maybe lager than standard buffer size
+  /// exception: The decoded text message was too big for the output buffer and the endpoint does not support partial messages
 		
 	private static final int MAX_TEXT_MESSAGE_SIZE = 2048000; // 2 Megabytes.
 	private static final int BUFFER_SIZE = MAX_TEXT_MESSAGE_SIZE * 5;
@@ -49,14 +47,14 @@ public class WebSocketClientService {
 	private static BlockingMap<String, String> notificationMap = new BlockingMap();
 	
 	private void initSession() {
-//		if ( webSocketSession == null) {
+		if ( webSocketSession == null) {
 			
 			try {
 				
 				
 				final WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 				container.setDefaultMaxBinaryMessageBufferSize(BUFFER_SIZE);
-				container.setDefaultMaxTextMessageBufferSize(BUFFER_SIZE);
+				container.setDefaultMaxTextMessageBufferSize(MAX_TEXT_MESSAGE_SIZE);
 
 				final WebSocketClient webSocketClient = new StandardWebSocketClient(container);
 				final WebSocketHandler webSocketHandler = new WebSocketMessageHandler(this);
@@ -69,7 +67,7 @@ public class WebSocketClientService {
 			catch (Exception e) {
 				e.printStackTrace();
 			}
-//		}
+		}
 	}
 	
 	public void closeSession() {
@@ -104,6 +102,8 @@ public class WebSocketClientService {
 				
 				if (sanitisedQuery != null && sanitisedQuery.length() > 0) {
 					sanitisedQuery = sanitisedQuery.replaceAll("\n","");
+					sanitisedQuery = sanitisedQuery.replaceAll("\"","\\\\\"");
+					
 				}
 								
 				myFrameId= String.valueOf(sFrameId++);
