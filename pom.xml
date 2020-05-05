@@ -17,7 +17,8 @@
 	OF CONTRACT, * ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION 
 	WITH THE * ** SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. * * 
 	******************************************************************************/ -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -26,8 +27,8 @@
 	<version>0.0.9</version>
 	<packaging>jar</packaging>
 	<name>graphqlio-http-proxy</name>
-	
-	<url>http://graphqlio.com</url>	
+
+	<url>http://graphqlio.com</url>
 	<description>proxy http controller for graphqlio-server used for testing with playground or graphiql gui </description>
 
 
@@ -47,7 +48,7 @@
 			<comments>See "https://en.wikipedia.org/wiki/MIT_License"</comments>
 		</license>
 	</licenses>
-	
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -60,14 +61,14 @@
 		</dependencies>
 	</dependencyManagement>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <graphql-io-server-java.version>0.0.9</graphql-io-server-java.version>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<graphql-io-server-java.version>0.0.9</graphql-io-server-java.version>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<java.source.version>8</java.source.version>
 		<java.target.version>8</java.target.version>
-    </properties>
+	</properties>
 
 	<dependencies>
 
@@ -77,13 +78,18 @@
 			<artifactId>graphql-io-server-spring-boot-starter</artifactId>
 			<version>0.0.9</version>
 		</dependency>
- 
+
 		<!-- Playground -->
 		<dependency>
-    		<groupId>com.graphql-java-kickstart</groupId>
-    		<artifactId>playground-spring-boot-starter</artifactId>
-    		<version>5.10.0</version>
-		</dependency>		
+			<groupId>com.graphql-java-kickstart</groupId>
+			<artifactId>playground-spring-boot-starter</artifactId>
+			<version>5.10.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -113,7 +119,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
- 				<configuration>
+				<configuration>
 					<skip>true</skip>
 				</configuration>
 			</plugin>
@@ -150,7 +156,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<repositories>
 		<repository>
 			<id>spring-repo</id>
@@ -225,7 +231,7 @@
 		<developerConnection>scm:git:git@github.com:Thinkenterprise/graphql-io-server-spring-boot-starter.git</developerConnection>
 		<url>https://github.com/Thinkenterprise/graphql-io-server-spring-boot-starter</url>
 	</scm>
-	
-	
+
+
 
 </project>
