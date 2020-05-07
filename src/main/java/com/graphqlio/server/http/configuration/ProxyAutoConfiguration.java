@@ -4,14 +4,14 @@ import org.reactivestreams.Publisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.graphqlio.server.http.proxy.reactive.ProxyPublisherFactory;
+import com.graphqlio.server.http.proxy.reactive.ProxyPublisherWithSinkFactory;
 
 @Configuration
 public class ProxyAutoConfiguration {
 
 	@Bean
-	public ProxyPublisherFactory createProxyPublisherFactory() {
-		return new ProxyPublisherFactory();
+	public ProxyPublisherWithSinkFactory createProxyPublisherFactory() {
+		return new ProxyPublisherWithSinkFactory();
 	}
 	
 	

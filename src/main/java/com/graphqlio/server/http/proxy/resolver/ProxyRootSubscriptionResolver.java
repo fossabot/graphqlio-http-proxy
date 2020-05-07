@@ -4,18 +4,19 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.coxautodev.graphql.tools.GraphQLSubscriptionResolver;
-import com.graphqlio.server.http.proxy.reactive.ProxyPublisherFactory;
+import com.graphqlio.server.http.proxy.reactive.ProxyPublisherWithSinkFactory;
+import com.graphqlio.server.http.proxy.reactive.ProxyPublisherWithSinkFactory.PublisherWithSink;
 
 
 public class ProxyRootSubscriptionResolver implements GraphQLSubscriptionResolver {
 
 	@Autowired
-	private ProxyPublisherFactory proxyPublisherFactory;
+	private ProxyPublisherWithSinkFactory proxyPublisherWithSinkFactory;
 	
 	public Publisher<String> outdated() {
-		Publisher<String> publisher = proxyPublisherFactory.create();
+		PublisherWithSink publisherWithSink = proxyPublisherWithSinkFactory.create();
 		// ToDo: Publisher im Repository ablegen ... 		
-		return publisher;
+		return publisherWithSink.getPublisher();
 	} 
 	
 }
