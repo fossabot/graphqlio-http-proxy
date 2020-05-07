@@ -18,5 +18,12 @@ public class ProxyRootSubscriptionResolver implements GraphQLSubscriptionResolve
 		// ToDo: Publisher im Repository ablegen ... 		
 		return publisherWithSink.getPublisher();
 	} 
+
+	public Publisher<String> notifications(String scope) {
+		// TODO: Wie wird der Paramter "scope" genutzt?
+		PublisherWithSink publisherWithSink = proxyPublisherWithSinkFactory.create();
+		// ToDo: Publisher im Repository ablegen ... 		
+		return publisherWithSink.getPublisher();
+	}
 	
 }

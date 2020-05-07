@@ -1,4 +1,4 @@
-
 extend type Subscription { 
-	outdated:String!
+	outdated: String!
+	notifications(scope: String!): String!
 }
