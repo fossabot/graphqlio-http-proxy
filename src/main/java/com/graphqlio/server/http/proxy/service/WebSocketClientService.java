@@ -1,11 +1,15 @@
 package com.graphqlio.server.http.proxy.service;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.websocket.ContainerProvider;
 import javax.websocket.WebSocketContainer;
 
+import com.graphqlio.server.http.proxy.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,8 +22,6 @@ import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.graphqlio.server.http.proxy.domain.BlockingMap;
-import com.graphqlio.server.http.proxy.domain.WsfRequestConverter;
 import com.graphqlio.wsf.converter.WsfConverter;
 import com.graphqlio.wsf.domain.WsfFrame;
 import com.graphqlio.wsf.domain.WsfFrameType;
@@ -48,7 +50,13 @@ public class WebSocketClientService {
 	
 	private void initSession() {
 		if ( webSocketSession == null) {
-			
+			// TODO: Wir müssen verhindern, dass der GQL-IO Client versucht eine Verbindung aufzubauen, bevor Server korrekt gestartet und GQL-Schema eingelesen (sonst Exception im Server)
+			try {
+				Thread.sleep(2000L);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
 			try {
 				
 				
@@ -123,9 +131,10 @@ public class WebSocketClientService {
 												
 				String jsonResponse = notificationMap.getOrWait(myFrameId);
 
-				logger.info("WebSocketClientService: Outgoing GraphQL response: " + jsonResponse);				
-				
-				return jsonResponse;
+				logger.info("WebSocketClientService: Outgoing GraphQL response: " + jsonResponse);
+				Map<String, Map<String, Object>> responseMap = new ObjectMapper().readValue(jsonResponse, HashMap.class);
+				appendSubscriptionsTo(responseMap);
+				return new ObjectMapper().writeValueAsString(responseMap);
 			}
 			catch (Exception e) {
 				String error = "{\"Exception\": \"" + e.toString() + "\"}";
@@ -140,6 +149,26 @@ public class WebSocketClientService {
 			notificationMap.getOrWait(myFrameId);
 			return error;
 		}
+	}
+
+	private void appendSubscriptionsTo(Map<String, Map<String, Object>> responseMap) {
+		Map<String, Object> schema = (Map<String, Object>) responseMap.get("data").get("__schema");
+		Map<String, String> subscriptionMap = new LinkedHashMap<>();
+		subscriptionMap.put("name", "Subscription");
+		schema.put("subscriptionType", subscriptionMap);
+		System.out.print("");
+		Type type = new Type();
+		type.kind = "OBJECT";
+		type.name = "Subscription";
+		Field field = new Field();
+		field.name = "outdated";
+		FieldType fieldType = new FieldType();
+		fieldType.kind = "SCALAR";
+		fieldType.name = "String";
+		field.type = fieldType;
+		type.fields.add(field);
+		List<Object> types = (List<Object>) schema.get("types");
+		types.add(type);
 	}
 
 	public void notify(String frameId, String message) {
