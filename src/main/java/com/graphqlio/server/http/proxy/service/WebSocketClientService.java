@@ -8,6 +8,7 @@ import com.graphqlio.wsf.domain.WsfFrame;
 import com.graphqlio.wsf.domain.WsfFrameType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.client.WebSocketClient;
@@ -42,6 +43,7 @@ public class WebSocketClientService {
     @SuppressWarnings("unchecked")
     private static BlockingMap<String, String> notificationMap = new BlockingMap();
 
+    @Autowired
     public WebSocketClientService(OutdatedPublisher outdatedPublisher) {
         this.outdatedPublisher = outdatedPublisher;
     }
