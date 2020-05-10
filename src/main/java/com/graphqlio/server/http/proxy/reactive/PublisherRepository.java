@@ -29,6 +29,20 @@ public class PublisherRepository {
         emitOnNotifications(scopeId, scopeId);
     }
 
+    public void unsubscribe(Subscriber<OperationMessage> subscriber) {
+        outdatedSubscribers.remove(subscriber);
+        List<String> removeEmptyElements = new ArrayList<>();
+        notificationsSubscribers.forEach((key, value) -> {
+            value.remove(subscriber);
+            if(removeEmptyElements.isEmpty()) {
+                removeEmptyElements.add(key);
+            }
+        });
+        removeEmptyElements.forEach(key -> {
+            notificationsSubscribers.remove(key);
+        });
+    }
+
     /**
      * @param scopeId scopeId
      * @param data E.g. a String "xyz", a POJO or Map. Everything will be converted to a json-String.

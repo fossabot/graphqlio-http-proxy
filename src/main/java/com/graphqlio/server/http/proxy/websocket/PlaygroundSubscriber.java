@@ -46,8 +46,8 @@ public class PlaygroundSubscriber implements Subscriber<OperationMessage> {
     @Override
     public boolean equals(Object obj) {
         if(obj == null) return false;
-        if(obj instanceof WebSocketSession) {
-            return session.getId().equals(((WebSocketSession) obj).getId());
+        if(obj instanceof PlaygroundSubscriber) {
+            return session.getId().equals(((PlaygroundSubscriber) obj).session.getId());
         } else  {
             return false;
         }
@@ -55,6 +55,6 @@ public class PlaygroundSubscriber implements Subscriber<OperationMessage> {
 
     @Override
     public int hashCode() {
-        return session.hashCode();
+        return session.getId().hashCode();
     }
 }

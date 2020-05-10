@@ -14,7 +14,6 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +24,6 @@ public class ProxyWebSocketHandler extends AbstractWebSocketHandler implements S
     private final Logger logger = LoggerFactory.getLogger(ProxyWebSocketHandler.class);
     private static final String SUB_PROTOCOL_TEXT = "graphql-ws";
 
-
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         logger.info("ProxyWebSocketHandler afterConnectionEstablished session    :" + session);
@@ -33,13 +31,13 @@ public class ProxyWebSocketHandler extends AbstractWebSocketHandler implements S
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        publisherRepository.unsubscribe(new PlaygroundSubscriber(session));
         logger.info("ProxyWebSocketHandler afterConnectionClosed session    :" + session);
     }
 
     @Override
     public List<String> getSubProtocols() {
-        return Arrays.asList(
-                SUB_PROTOCOL_TEXT);
+        return Arrays.asList(SUB_PROTOCOL_TEXT);
     }
 
     @Override
@@ -51,21 +49,23 @@ public class ProxyWebSocketHandler extends AbstractWebSocketHandler implements S
         logger.info("ProxyWebSocketHandler handleTextMessage this       :" + this);
         logger.info("ProxyWebSocketHandler handleTextMessage Thread     :" + Thread.currentThread());
 
+        PlaygroundSubscriber subscriber = new PlaygroundSubscriber(session);
+
         if (operationMessage.getType() == OperationMessage.Type.GQL_CONNECTION_INIT) {
             OperationMessage ack = new OperationMessage(OperationMessage.Type.GQL_CONNECTION_ACK, null, null);
             session.sendMessage(new TextMessage(new ObjectMapper().writeValueAsString(ack)));
         } else if(operationMessage.getType() == OperationMessage.Type.GQL_START) {
             String payload = ((Map<String, String>) operationMessage.getPayload()).get("query");
             if(payload.contains("outdated")) {
-                publisherRepository.subscribeOnOutdated(new PlaygroundSubscriber(session));
+                publisherRepository.subscribeOnOutdated(subscriber);
             } else if(payload.contains("notifications") && payload.contains("scope")) {
                 String scopeId = payload.replaceAll(" ", "");
                 scopeId = scopeId.substring(scopeId.indexOf("scope:\"")+7);
                 scopeId = scopeId.substring(0, scopeId.indexOf("\""));
-                publisherRepository.subscribeOnNotifications(scopeId, new PlaygroundSubscriber(session));
+                publisherRepository.subscribeOnNotifications(scopeId, subscriber);
             }
         } else if(operationMessage.getType() == OperationMessage.Type.GQL_STOP) {
-            // TODO: Unsubscribe
+            publisherRepository.unsubscribe(subscriber);
         }
     }
 
