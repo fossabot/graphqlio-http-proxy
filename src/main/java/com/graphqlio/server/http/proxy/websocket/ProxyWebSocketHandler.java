@@ -14,9 +14,12 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
+import javax.websocket.Session;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProxyWebSocketHandler extends AbstractWebSocketHandler implements SubProtocolCapable {
 
@@ -50,26 +53,26 @@ public class ProxyWebSocketHandler extends AbstractWebSocketHandler implements S
         logger.info("ProxyWebSocketHandler handleTextMessage session ID :" + session.getId());
         logger.info("ProxyWebSocketHandler handleTextMessage this       :" + this);
         logger.info("ProxyWebSocketHandler handleTextMessage Thread     :" + Thread.currentThread());
-        // TODO müssen wir stop-Befehl handlen, um Daten zu löschen?
+
         if (operationMessage.getType() == OperationMessage.Type.GQL_CONNECTION_INIT) {
             OperationMessage ack = new OperationMessage(OperationMessage.Type.GQL_CONNECTION_ACK, null, null);
             session.sendMessage(new TextMessage(new ObjectMapper().writeValueAsString(ack)));
 
-            outdatedPublisher.subscribe(new Subscriber<String>() {
+            outdatedPublisher.subscribe(new Subscriber<Object>() {
                 @Override
                 public void onSubscribe(Subscription subscription) {
-                    subscription.request(Long.MAX_VALUE);
                 }
 
                 @Override
-                public void onNext(String s) {
+                public void onNext(Object responsePayload) {
                     try {
-                        String responseJsonRepresentation = new ObjectMapper().writeValueAsString(s);
-                        Map<String, Object> responseData = new LinkedHashMap<>();
-                        responseData.put("data", responseJsonRepresentation);
-                        OperationMessage responseMsg = new OperationMessage(OperationMessage.Type.GQL_DATA, "1", responseJsonRepresentation);
-                        session.sendMessage(new TextMessage(new ObjectMapper().writeValueAsString(responseMsg)));
+                        if(session.isOpen()) {
+                            session.sendMessage(new TextMessage(new ObjectMapper().writeValueAsString(responsePayload)));
+                        } else {
+                            // FIXME: Unsubscribe
+                        }
                     } catch (Exception e) {
+                        // FIXME: Unsubscribe
                         e.printStackTrace();
                     }
                 }
@@ -83,10 +86,24 @@ public class ProxyWebSocketHandler extends AbstractWebSocketHandler implements S
                 public void onComplete() {
 
                 }
+
+                @Override
+                public boolean equals(Object obj) {
+                    if(obj == null) return false;
+                    if(obj instanceof Session) {
+                        return session.getId().equals(((Session) obj).getId());
+                    } else  {
+                        return false;
+                    }
+                }
+
+                @Override
+                public int hashCode() {
+                    return session.hashCode();
+                }
             });
-        }
-        else if (operationMessage.getType() == OperationMessage.Type.GQL_START) {
-            outdatedPublisher.emit("12345");
+        } else if(operationMessage.getType() == OperationMessage.Type.GQL_STOP) {
+            // TODO: Unsubscribe
         }
     }
 

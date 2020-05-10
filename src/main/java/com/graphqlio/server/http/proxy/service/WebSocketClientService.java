@@ -156,10 +156,10 @@ public class WebSocketClientService {
         Map<String, String> subscriptionMap = new LinkedHashMap<>();
         subscriptionMap.put("name", "Subscription");
         schema.put("subscriptionType", subscriptionMap);
-        System.out.print("");
         Type type = new Type();
         type.kind = "OBJECT";
         type.name = "Subscription";
+        // outdated: String
         Field field = new Field();
         field.name = "outdated";
         FieldType fieldType = new FieldType();
@@ -167,6 +167,14 @@ public class WebSocketClientService {
         fieldType.name = "String";
         field.type = fieldType;
         type.fields.add(field);
+        // notifications(scope: String!): String!
+        Field field2 = new Field();
+        field2.name = "notifications";
+        FieldType fieldType2 = new FieldType();
+        fieldType2.kind = "SCALAR";
+        fieldType2.name = "String";
+        field2.type = fieldType2;
+        type.fields.add(field2);
         List<Object> types = (List<Object>) schema.get("types");
         types.add(type);
     }
@@ -175,7 +183,7 @@ public class WebSocketClientService {
         if (wsfFrame.getType() == WsfFrameType.GRAPHQLRESPONSE) {
             notificationMap.putAndSignal(wsfFrame.getFid(), wsfFrame.getData());
         } else if (wsfFrame.getType() == WsfFrameType.GRAPHQLNOTIFIER) {
-            outdatedPublisher.emit(wsfFrame.getData());
+            outdatedPublisher.emit(wsfFrame.getData().substring(10, wsfFrame.getData().length()-3));
         }
     }
 
