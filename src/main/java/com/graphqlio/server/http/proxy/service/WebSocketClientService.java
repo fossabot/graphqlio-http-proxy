@@ -3,6 +3,7 @@ package com.graphqlio.server.http.proxy.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.graphqlio.server.http.proxy.domain.*;
 import com.graphqlio.server.http.proxy.reactive.OutdatedPublisher;
+import com.graphqlio.server.http.proxy.scheme.ExtendScheme;
 import com.graphqlio.wsf.converter.WsfConverter;
 import com.graphqlio.wsf.domain.WsfFrame;
 import com.graphqlio.wsf.domain.WsfFrameType;
@@ -17,9 +18,6 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import javax.websocket.ContainerProvider;
 import javax.websocket.WebSocketContainer;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -130,13 +128,7 @@ public class WebSocketClientService {
 
                 logger.debug("WebSocketClientService: Outgoing GraphQL response: " + jsonResponse);
 
-                if (isSchemaRequest(jsonResponse)) {
-                    Map<String, Map<String, Object>> responseMap = new ObjectMapper().readValue(jsonResponse, HashMap.class);
-                    appendSubscriptionsTo(responseMap);
-                    return new ObjectMapper().writeValueAsString(responseMap);
-                } else {
-                    return jsonResponse;
-                }
+                return new ExtendScheme().response(jsonResponse);
             } catch (Exception e) {
                 String error = "{\"Exception\": \"" + e.toString() + "\"}";
                 logger.debug("WebSocketClientService: Outgoing GraphQL response: " + error);
@@ -151,43 +143,11 @@ public class WebSocketClientService {
         }
     }
 
-    private void appendSubscriptionsTo(Map<String, Map<String, Object>> responseMap) {
-        Map<String, Object> schema = (Map<String, Object>) responseMap.get("data").get("__schema");
-        Map<String, String> subscriptionMap = new LinkedHashMap<>();
-        subscriptionMap.put("name", "Subscription");
-        schema.put("subscriptionType", subscriptionMap);
-        Type type = new Type();
-        type.kind = "OBJECT";
-        type.name = "Subscription";
-        // outdated: String
-        Field field = new Field();
-        field.name = "outdated";
-        FieldType fieldType = new FieldType();
-        fieldType.kind = "SCALAR";
-        fieldType.name = "String";
-        field.type = fieldType;
-        type.fields.add(field);
-        // notifications(scope: String!): String!
-        Field field2 = new Field();
-        field2.name = "notifications";
-        FieldType fieldType2 = new FieldType();
-        fieldType2.kind = "SCALAR";
-        fieldType2.name = "String";
-        field2.type = fieldType2;
-        type.fields.add(field2);
-        List<Object> types = (List<Object>) schema.get("types");
-        types.add(type);
-    }
-
     public void notify(WsfFrame wsfFrame) {
         if (wsfFrame.getType() == WsfFrameType.GRAPHQLRESPONSE) {
             notificationMap.putAndSignal(wsfFrame.getFid(), wsfFrame.getData());
         } else if (wsfFrame.getType() == WsfFrameType.GRAPHQLNOTIFIER) {
             outdatedPublisher.emit(wsfFrame.getData().substring(10, wsfFrame.getData().length()-3));
         }
-    }
-
-    private boolean isSchemaRequest(String jsonResponse) {
-        return jsonResponse.startsWith("{\"data\":{\"__schema\":{\"types\":");
     }
 }

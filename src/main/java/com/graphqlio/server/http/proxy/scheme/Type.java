@@ -1,4 +1,4 @@
-package com.graphqlio.server.http.proxy.domain;
+package com.graphqlio.server.http.proxy.scheme;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
