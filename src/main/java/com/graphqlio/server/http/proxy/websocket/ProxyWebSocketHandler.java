@@ -1,8 +1,5 @@
 package com.graphqlio.server.http.proxy.websocket;
 
-import java.io.IOException;
-import java.util.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.graphqlio.server.http.proxy.reactive.OutdatedPublisher;
 import graphql.kickstart.execution.subscriptions.apollo.OperationMessage;
@@ -11,8 +8,15 @@ import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.socket.*;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.SubProtocolCapable;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class ProxyWebSocketHandler extends AbstractWebSocketHandler implements SubProtocolCapable {
 
