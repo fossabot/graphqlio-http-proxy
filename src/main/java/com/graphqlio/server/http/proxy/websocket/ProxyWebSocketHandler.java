@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.graphqlio.server.http.proxy.reactive.OutdatedPublisher;
+import graphql.kickstart.execution.subscriptions.apollo.OperationMessage;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;

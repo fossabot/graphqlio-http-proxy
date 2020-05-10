@@ -29,7 +29,7 @@ import com.graphqlio.wsf.domain.WsfFrameType;
 @Service
 public class WebSocketClientService {
 
-	private final Logger logger = LoggerFactory.getLogger(WebSocketMessageHandler.class);
+	private final Logger logger = LoggerFactory.getLogger(WebSocketClientService.class);
 	private static int sFrameId = 0;
 
   /// increase Standard Buffer size for socket - introspection message maybe lager than standard buffer size
@@ -94,7 +94,7 @@ public class WebSocketClientService {
 	
 	public String graphQlQuery(String jsonRequest) {
 
-		logger.info("WebSocketClientService: Incoming GraphQL query: " + jsonRequest);
+		logger.debug("WebSocketClientService: Incoming GraphQL query: " + jsonRequest);
 			
 		initSession();
 		
@@ -131,21 +131,26 @@ public class WebSocketClientService {
 												
 				String jsonResponse = notificationMap.getOrWait(myFrameId);
 
-				logger.info("WebSocketClientService: Outgoing GraphQL response: " + jsonResponse);
-				Map<String, Map<String, Object>> responseMap = new ObjectMapper().readValue(jsonResponse, HashMap.class);
-				appendSubscriptionsTo(responseMap);
-				return new ObjectMapper().writeValueAsString(responseMap);
+				logger.debug("WebSocketClientService: Outgoing GraphQL response: " + jsonResponse);
+
+				if(isSchemaRequest(jsonResponse)) {
+					Map<String, Map<String, Object>> responseMap = new ObjectMapper().readValue(jsonResponse, HashMap.class);
+					appendSubscriptionsTo(responseMap);
+					return new ObjectMapper().writeValueAsString(responseMap);
+				} else {
+					return jsonResponse;
+				}
 			}
 			catch (Exception e) {
 				String error = "{\"Exception\": \"" + e.toString() + "\"}";
-				logger.info("WebSocketClientService: Outgoing GraphQL response: " + error);				
+				logger.debug("WebSocketClientService: Outgoing GraphQL response: " + error);
 				notificationMap.getOrWait(myFrameId);
 				return error;
 			}			
 		}
 		else {
 			String error = "{\"Error\": \"Connecting to WebSocket failed\"}";
-			logger.info("WebSocketClientService: Outgoing GraphQL response: " + error);				
+			logger.debug("WebSocketClientService: Outgoing GraphQL response: " + error);
 			notificationMap.getOrWait(myFrameId);
 			return error;
 		}
