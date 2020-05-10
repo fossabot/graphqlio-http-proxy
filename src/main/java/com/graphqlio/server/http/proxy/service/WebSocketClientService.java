@@ -2,7 +2,7 @@ package com.graphqlio.server.http.proxy.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.graphqlio.server.http.proxy.domain.*;
-import com.graphqlio.server.http.proxy.reactive.OutdatedPublisher;
+import com.graphqlio.server.http.proxy.reactive.PublisherRepository;
 import com.graphqlio.server.http.proxy.scheme.ExtendScheme;
 import com.graphqlio.wsf.converter.WsfConverter;
 import com.graphqlio.wsf.domain.WsfFrame;
@@ -31,7 +31,7 @@ public class WebSocketClientService {
 
     private static final int MAX_TEXT_MESSAGE_SIZE = 2048000; // 2 Megabytes.
     private static final int BUFFER_SIZE = MAX_TEXT_MESSAGE_SIZE * 5;
-    private final OutdatedPublisher outdatedPublisher;
+    private final PublisherRepository publisherRepository;
 
     /// ToDo --  read graphql server ws endpoint
     private final String graphqlio_server_ws_endpoint = "ws://127.0.0.1:8080/api/data/graph";
@@ -42,8 +42,8 @@ public class WebSocketClientService {
     private static BlockingMap<String, String> notificationMap = new BlockingMap();
 
     @Autowired
-    public WebSocketClientService(OutdatedPublisher outdatedPublisher) {
-        this.outdatedPublisher = outdatedPublisher;
+    public WebSocketClientService(PublisherRepository publisherRepository) {
+        this.publisherRepository = publisherRepository;
     }
 
     private void initSession() {
@@ -147,7 +147,7 @@ public class WebSocketClientService {
         if (wsfFrame.getType() == WsfFrameType.GRAPHQLRESPONSE) {
             notificationMap.putAndSignal(wsfFrame.getFid(), wsfFrame.getData());
         } else if (wsfFrame.getType() == WsfFrameType.GRAPHQLNOTIFIER) {
-            outdatedPublisher.emit(wsfFrame.getData().substring(10, wsfFrame.getData().length()-3));
+            publisherRepository.emit(wsfFrame);
         }
     }
 }

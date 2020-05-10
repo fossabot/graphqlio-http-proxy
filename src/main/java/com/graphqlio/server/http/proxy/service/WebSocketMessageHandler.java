@@ -34,10 +34,15 @@ public class WebSocketMessageHandler extends AbstractWebSocketHandler {
         // [1,1,"GRAPHQL-RESPONSE",{"data":{"updateRoute":{"flightNumber":"LH2084","departure":"HAM","destination":"MUC"}}}]
         WsfConverter wsfConverter = new WsfResponseConverter();
         WsfFrame responseFrame = null;
-        if (messageText.contains("GRAPHQL-RESPONSE")) {
-            responseFrame = wsfConverter.convert(messageText);
-        } else if (messageText.contains("GRAPHQL-NOTIFY")) {
-            responseFrame = createNotifierFrameFrom(messageText);
+        try {
+            if (messageText.contains("GRAPHQL-RESPONSE")) {
+                responseFrame = wsfConverter.convert(messageText);
+            } else if (messageText.contains("GRAPHQL-NOTIFY")) {
+                responseFrame = createNotifierFrameFrom(messageText);
+            }
+        } catch(Exception ex) {
+            // FIXME: Nullpointer?
+            ex.printStackTrace();
         }
         webSocketClient.notify(responseFrame);
     }

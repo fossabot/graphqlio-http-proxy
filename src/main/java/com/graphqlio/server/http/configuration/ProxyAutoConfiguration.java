@@ -1,7 +1,5 @@
 package com.graphqlio.server.http.configuration;
 
-import com.graphqlio.server.http.proxy.reactive.OutdatedPublisher;
-import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
