@@ -150,4 +150,8 @@ public class WebSocketClientService {
             publisherRepository.emit(wsfFrame);
         }
     }
+
+    public void notifyError(WsfFrame wsfFrame) {
+        notificationMap.putAndSignal(wsfFrame.getFid(), wsfFrame.getData());
+    }
 }

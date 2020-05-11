@@ -40,11 +40,13 @@ public class WebSocketMessageHandler extends AbstractWebSocketHandler {
             } else if (messageText.contains("GRAPHQL-NOTIFY")) {
                 responseFrame = createNotifierFrameFrom(messageText);
             }
+            webSocketClient.notify(responseFrame);
         } catch(Exception ex) {
-            // FIXME: Nullpointer?
+            // TODO: Is thrown when:
+            // [149,1,"GRAPHQL-RESPONSE",{"errors":[{"message":"Validation error of type WrongType: argument 'input' with value 'ObjectValue{objectFields=[ObjectField{name='departure', value=StringValue{value='XYZ'}}]}' is missing required fields '[flightNumber]' @ 'updateRoute'","locations":[{"line":1,"column":49}],"extensions":{"classification":"ValidationError"}}]}]
+            webSocketClient.notifyError(createNotifierFrameFrom(messageText));
             ex.printStackTrace();
         }
-        webSocketClient.notify(responseFrame);
     }
 
     private WsfFrame createNotifierFrameFrom(String messageText) {
