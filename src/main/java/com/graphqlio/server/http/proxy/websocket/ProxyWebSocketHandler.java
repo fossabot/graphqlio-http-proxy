@@ -22,7 +22,7 @@ public class ProxyWebSocketHandler extends AbstractWebSocketHandler implements S
     @Autowired
     private PublisherRepository publisherRepository;
     private final Logger logger = LoggerFactory.getLogger(ProxyWebSocketHandler.class);
-    private static final String SUB_PROTOCOL_TEXT = "graphql-ws";
+    private static final String WS_PROTOCOL_GRAPHQL_WS = "graphql-ws";
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -37,7 +37,7 @@ public class ProxyWebSocketHandler extends AbstractWebSocketHandler implements S
 
     @Override
     public List<String> getSubProtocols() {
-        return Arrays.asList(SUB_PROTOCOL_TEXT);
+        return Arrays.asList(WS_PROTOCOL_GRAPHQL_WS);
     }
 
     @Override
@@ -54,17 +54,17 @@ public class ProxyWebSocketHandler extends AbstractWebSocketHandler implements S
         if (operationMessage.getType() == OperationMessage.Type.GQL_CONNECTION_INIT) {
             OperationMessage ack = new OperationMessage(OperationMessage.Type.GQL_CONNECTION_ACK, null, null);
             session.sendMessage(new TextMessage(new ObjectMapper().writeValueAsString(ack)));
-        } else if(operationMessage.getType() == OperationMessage.Type.GQL_START) {
+        } else if (operationMessage.getType() == OperationMessage.Type.GQL_START) {
             String payload = ((Map<String, String>) operationMessage.getPayload()).get("query");
-            if(payload.contains("outdated")) {
+            if (payload.contains("outdated")) {
                 publisherRepository.subscribeOnOutdated(subscriber);
-            } else if(payload.contains("notifications") && payload.contains("scope")) {
+            } else if (payload.contains("notifications") && payload.contains("scope")) {
                 String scopeId = payload.replaceAll(" ", "");
-                scopeId = scopeId.substring(scopeId.indexOf("scope:\"")+7);
+                scopeId = scopeId.substring(scopeId.indexOf("scope:\"") + 7);
                 scopeId = scopeId.substring(0, scopeId.indexOf("\""));
                 publisherRepository.subscribeOnNotifications(scopeId, subscriber);
             }
-        } else if(operationMessage.getType() == OperationMessage.Type.GQL_STOP) {
+        } else if (operationMessage.getType() == OperationMessage.Type.GQL_STOP) {
             publisherRepository.unsubscribe(subscriber);
         }
     }
